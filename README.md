@@ -7,16 +7,16 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 
 ## Features ✨
 
-- **📝 Easy Logging**: Quickly log your daily work activities with project names and descriptions
-- **📈 Automatic Reports**: Generate weekly, bi-weekly, and monthly reports instantly
-- **💻 Dual Interface**: Use either the command-line interface or the professional web UI
-- **🗄️ SQLite Database**: All data stored locally in a lightweight SQLite database
-- **🎯 Project Tracking**: Automatically organize logs by project
-- **📅 Flexible Dating**: Log entries for any date, not just today
-- **🔍 Easy Search**: View and filter logs by date range
-- **🗑️ Data Management**: Delete individual entries or clear entire database
+- **Easy Logging**: Quickly log your daily work activities with project names and descriptions
+- **Automatic Reports**: Generate weekly, bi-weekly, and monthly reports instantly
+- **Dual Interface**: Use either the command-line interface or the professional web UI
+- **SQLite Database**: All data stored locally in a lightweight SQLite database
+- **Project Tracking**: Automatically organize logs by project
+- **Flexible Dating**: Log entries for any date, not just today
+- **Easy Search**: View and filter logs by date range
+- **Data Management**: Delete individual entries or clear entire database
 
-## Installation 🚀
+## Installation
 
 ### From PyPI (Recommended)
 
@@ -32,7 +32,7 @@ cd fastrep
 pip install -e .
 ```
 
-## Quick Start 🏃
+## Quick Start
 
 ### Command Line Interface
 
@@ -75,7 +75,7 @@ fastrep-ui
 
 The web interface will automatically open in your default browser at `http://127.0.0.1:5000`.
 
-## Usage Examples 💡
+## Usage Examples
 
 ### Daily Workflow
 
@@ -109,44 +109,54 @@ Project: Documentation
   * 11/19 - Created user guide for new features
 ```
 
-## CLI Commands Reference 📚
+## CLI Commands Reference
 
 ### `fastrep log`
+
 Add a new work log entry.
 
 **Options:**
+
 - `-p, --project TEXT`: Project name (required)
 - `-d, --description TEXT`: Work description (required)
 - `-dt, --date TEXT`: Date in YYYY-MM-DD format (optional, defaults to today)
 
 ### `fastrep view`
+
 View logs and generate reports.
 
 **Options:**
+
 - `-m, --mode [weekly|biweekly|monthly]`: Report period (default: weekly)
 - `-s, --start TEXT`: Custom start date (YYYY-MM-DD)
 - `-e, --end TEXT`: Custom end date (YYYY-MM-DD)
 
 ### `fastrep list`
+
 List all log entries with their IDs.
 
 ### `fastrep projects`
+
 List all unique projects.
 
 ### `fastrep delete`
+
 Delete a specific log entry.
 
 **Options:**
+
 - `-i, --id INTEGER`: Log entry ID to delete (required)
 - `-y, --confirm`: Skip confirmation prompt
 
 ### `fastrep clear`
+
 Clear all log entries from the database.
 
 **Options:**
+
 - `-y, --confirm`: Skip confirmation prompt
 
-## Web UI Features 🌐
+## Web UI Features
 
 The web interface provides:
 
@@ -156,13 +166,13 @@ The web interface provides:
 4. **Copy to Clipboard**: Easy report copying for emails/documents
 5. **Settings**: Database management and configuration
 
-## Database Location 💾
+## Database Location
 
 Logs are stored in: `~/.fastrep/fastrep.db`
 
 Both CLI and web UI use the same database, so your data is always in sync.
 
-## Development 🛠️
+## Development
 
 ### Setup Development Environment
 
@@ -170,13 +180,6 @@ Both CLI and web UI use the same database, so your data is always in sync.
 git clone https://github.com/hissain/fastrep.git
 cd fastrep
 pip install -e .
-```
-
-### Running Tests
-
-```bash
-pip install pytest
-pytest tests/
 ```
 
 ### Project Structure
@@ -198,31 +201,7 @@ fastrep/
 └── README.md
 ```
 
-## Publishing to PyPI 📦
-
-### Prerequisites
-
-1. Create account on [PyPI](https://pypi.org/)
-2. Generate API token in your PyPI account settings
-3. Add the token as `PYPI_API_TOKEN` in your GitHub repository secrets
-
-### Release Process
-
-1. Update version in `setup.py`
-2. Commit changes
-3. Create and push a tag:
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The GitHub Actions workflow will automatically:
-- Build the package
-- Publish to PyPI
-- Create a GitHub release
-
-## Contributing 🤝
+## Contributing 
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -232,25 +211,27 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License 📄
+## License 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Author ✍️
+## Author 
 
-**Your Name**
+**Md. Sazzad Hissain Khan**
+
 - GitHub: [@hissain](https://github.com/hissain)
 - Email: hissain.khan@gmail.com
 
-## Acknowledgments 🙏
+## Acknowledgments 
 
 - Built with [Click](https://click.palletsprojects.com/) for CLI
 - Web UI powered by [Flask](https://flask.palletsprojects.com/)
 - Database management with SQLite
 
-## Support 💬
+## Support 
 
 If you encounter any issues or have questions:
+
 - Open an issue on [GitHub](https://github.com/hissain/fastrep/issues)
 - Check existing issues for solutions
 
