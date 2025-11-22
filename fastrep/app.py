@@ -66,11 +66,13 @@ def create_app():
         start_date, end_date = ReportGenerator.get_date_range(mode)
         logs = db.get_logs(start_date, end_date)
         report_html = ReportGenerator.format_report_html(logs, mode)
+        report_text = ReportGenerator.format_report(logs, mode)
         
         return render_template('index.html', 
                              logs=db.get_logs(), 
                              projects=db.get_all_projects(),
                              report=report_html,
+                             report_text=report_text,
                              report_mode=mode)
     
     @app.route('/settings')

@@ -80,7 +80,7 @@ class ReportGenerator:
         
         if mode:
             start_date, end_date = ReportGenerator.get_date_range(mode)
-            html_parts.append(f"<h3>Report Period: {start_date.strftime('%m/%d')} - {end_date.strftime('%m/%d')}</h3>")
+            html_parts.append(f"<p><strong>Report Period:</strong> {start_date.strftime('%m/%d')} - {end_date.strftime('%m/%d')}</p>")
         
         for project in sorted(grouped.keys()):
             html_parts.append(f"<h4>{project}</h4>")
@@ -92,4 +92,4 @@ class ReportGenerator:
             
             html_parts.append("</ul>")
         
-        return "\n".join(html_parts)
+        return "".join(html_parts)

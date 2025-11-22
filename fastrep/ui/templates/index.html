@@ -46,7 +46,10 @@
             <div class="report-content">
                 {{ report|safe }}
             </div>
+            {% if report_text %}
+            <pre id="report-text" style="display:none;">{{ report_text }}</pre>
             <button onclick="copyReport()" class="btn btn-secondary">Copy to Clipboard</button>
+            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -152,10 +155,9 @@ async function deleteLog(logId) {
 
 // Copy report to clipboard
 function copyReport() {
-    const reportContent = document.querySelector('.report-content');
-    const text = reportContent.innerText;
+    const reportText = document.getElementById('report-text').textContent;
     
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(reportText).then(() => {
         alert('Report copied to clipboard!');
     }).catch(err => {
         console.error('Failed to copy:', err);
