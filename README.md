@@ -21,9 +21,9 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 ## Screenshots 📸
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hissain/fastrep/main/figures/Screenshot1.png" alt="FastRep Dashboard" width="45%">
+  <img src="https://raw.githubusercontent.com/hissain/fastrep/master/figures/Screenshot1.png" alt="FastRep Dashboard" width="45%">
   &nbsp; &nbsp;
-  <img src="https://raw.githubusercontent.com/hissain/fastrep/main/figures/Screenshot2.png" alt="FastRep Reports" width="45%">
+  <img src="https://raw.githubusercontent.com/hissain/fastrep/master/figures/Screenshot2.png" alt="FastRep Reports" width="45%">
 </p>
 
 ## Installation
