@@ -15,6 +15,16 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 - **Flexible Dating**: Log entries for any date, not just today
 - **Easy Search**: View and filter logs by date range
 - **Data Management**: Delete individual entries or clear entire database
+- **Dark/Light Theme**: Choose your preferred theme or sync with system settings
+- **App Mode**: Launches as a standalone application window for a cleaner experience
+
+## Screenshots 📸
+
+<p align="center">
+  <img src="figures/Screenshot1.png" alt="FastRep Dashboard" width="45%">
+  &nbsp; &nbsp;
+  <img src="figures/Screenshot2.png" alt="FastRep Reports" width="45%">
+</p>
 
 ## Installation
 
@@ -117,7 +127,7 @@ Add a new work log entry.
 
 **Options:**
 
-- `-p, --project TEXT`: Project name (required)
+- `-p, --project TEXT`: Project name (optional, defaults to "Misc")
 - `-d, --description TEXT`: Work description (required)
 - `-dt, --date TEXT`: Date in YYYY-MM-DD format (optional, defaults to today)
 
@@ -161,10 +171,13 @@ Clear all log entries from the database.
 The web interface provides:
 
 1. **Dashboard**: Add new logs with autocomplete for project names
-2. **Recent Logs Table**: View, search, and delete entries
+2. **Recent Logs Table**: View, edit, and delete entries
 3. **Report Generation**: One-click weekly, bi-weekly, and monthly reports
 4. **Copy to Clipboard**: Easy report copying for emails/documents
-5. **Settings**: Database management and configuration
+5. **Theme Support**: Toggle between Light, Dark, and System themes
+6. **Settings**: Database management and configuration
+7. **App Mode**: Opens in a dedicated window without browser clutter
+8. **Compact Design**: Optimized form layout for quick entry
 
 ## Database Location
 

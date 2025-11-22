@@ -12,7 +12,7 @@ def cli():
 
 
 @cli.command()
-@click.option('--project', '-p', required=True, help='Project name')
+@click.option('--project', '-p', default="Misc", help='Project name')
 @click.option('--description', '-d', required=True, help='Work description')
 @click.option('--date', '-dt', default=None, help='Date (YYYY-MM-DD), defaults to today')
 def log(project, description, date):
