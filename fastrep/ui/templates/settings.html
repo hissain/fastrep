@@ -19,6 +19,25 @@
             </div>
             <p id="current-theme-text" class="info-text">Current theme: System</p>
         </div>
+
+        <div class="settings-section">
+            <h3>AI Summarization</h3>
+            <p class="info-text">
+                Automatically summarize project logs in monthly reports using Cline CLI.
+            </p>
+            
+            <div id="ai-status" class="status-indicator">
+                Checking availability...
+            </div>
+            
+            <div class="toggle-container" style="margin-top: 1rem;">
+                <label class="switch">
+                    <input type="checkbox" id="ai-toggle" onchange="toggleAiSummary()">
+                    <span class="slider round"></span>
+                </label>
+                <span id="ai-toggle-label">Enable Monthly Summaries</span>
+            </div>
+        </div>
         
         <div class="settings-section">
             <h3>Database Management</h3>
@@ -50,7 +69,7 @@ fastrep delete --id 1</code></pre>
         <div class="settings-section">
             <h3>About</h3>
             <p class="info-text">
-                FastRep v1.0.6<br>
+                FastRep v2.0.0<br>
                 A simple work log manager for tracking daily activities and generating reports.<br>
                 <a href="https://github.com/hissain/fastrep" target="_blank">GitHub Repository</a>
             </p>
@@ -92,6 +111,49 @@ function setTheme(theme) {
 
 // Initialize text
 updateThemeText();
+
+// AI Settings
+async function loadAiSettings() {
+    try {
+        const response = await fetch('/api/settings');
+        const settings = await response.json();
+        
+        const statusDiv = document.getElementById('ai-status');
+        const toggle = document.getElementById('ai-toggle');
+        
+        if (settings.cline_available) {
+            statusDiv.innerHTML = '✅ Cline CLI detected';
+            statusDiv.className = 'status-indicator success';
+            toggle.disabled = false;
+        } else {
+            statusDiv.innerHTML = '❌ Cline CLI not found';
+            statusDiv.className = 'status-indicator error';
+            toggle.disabled = true;
+        }
+        
+        toggle.checked = settings.ai_summary_enabled;
+        
+    } catch (error) {
+        console.error('Error loading settings:', error);
+    }
+}
+
+async function toggleAiSummary() {
+    const toggle = document.getElementById('ai-toggle');
+    try {
+        await fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ai_summary_enabled: toggle.checked })
+        });
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        toggle.checked = !toggle.checked; // Revert on error
+    }
+}
+
+// Load settings on page load
+loadAiSettings();
 
 async function clearDatabase() {
     const confirmed = confirm(

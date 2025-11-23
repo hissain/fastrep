@@ -33,6 +33,13 @@ class Database:
                 created_at TEXT NOT NULL
             )
         ''')
+        
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        ''')
         conn.commit()
         conn.close()
     
@@ -134,3 +141,23 @@ class Database:
         projects = [row[0] for row in cursor.fetchall()]
         conn.close()
         return projects
+
+    def get_setting(self, key: str, default: str = None) -> str:
+        """Get a setting value by key."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT value FROM settings WHERE key = ?', (key,))
+        row = cursor.fetchone()
+        conn.close()
+        return row[0] if row else default
+
+    def set_setting(self, key: str, value: str):
+        """Set a setting value."""
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT OR REPLACE INTO settings (key, value)
+            VALUES (?, ?)
+        ''', (key, str(value)))
+        conn.commit()
+        conn.close()

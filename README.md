@@ -17,6 +17,7 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 - **Data Management**: Delete individual entries or clear entire database
 - **Dark/Light Theme**: Choose your preferred theme or sync with system settings
 - **App Mode**: Launches as a standalone application window for a cleaner experience
+- **AI Summarization**: Automatically summarizes extensive monthly logs into concise bullet points using Cline
 
 ## Screenshots
 
@@ -91,6 +92,12 @@ You can also specify a custom port:
 fastrep-ui --port 8080
 # or
 fastrep-ui -p 8080
+```
+
+For debugging AI summarization issues, use verbose mode:
+
+```bash
+fastrep-ui --verbose
 ```
 
 ## Usage Examples
@@ -182,10 +189,11 @@ The web interface provides:
 2. **Recent Logs Table**: View, edit, and delete entries
 3. **Report Generation**: One-click weekly, bi-weekly, and monthly reports
 4. **Copy to Clipboard**: Easy report copying for emails/documents
-5. **Theme Support**: Toggle between Light, Dark, and System themes
-6. **Settings**: Database management and configuration
-7. **App Mode**: Opens in a dedicated window without browser clutter
-8. **Compact Design**: Optimized form layout for quick entry
+5. **AI Summarization**: Intelligent summarization for monthly reports (requires Cline CLI)
+6. **Theme Support**: Toggle between Light, Dark, and System themes
+7. **Settings**: Database management, AI configuration, and preferences
+8. **App Mode**: Opens in a dedicated window without browser clutter
+9. **Compact Design**: Optimized form layout for quick entry
 
 ## Database Location
 

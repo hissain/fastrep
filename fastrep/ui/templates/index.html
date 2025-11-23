@@ -1,6 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h3>Generating Report...</h3>
+        <p>AI summarization may take a few moments.</p>
+    </div>
+</div>
+
 <div class="dashboard">
     <!-- Add Log Entry Form -->
     <div class="card compact-form">
@@ -41,9 +50,9 @@
     <div class="card">
         <h2>📈 Generate Reports</h2>
         <div class="report-buttons">
-            <a href="{{ url_for('report', mode='weekly') }}" class="btn btn-secondary">Weekly Report</a>
-            <a href="{{ url_for('report', mode='biweekly') }}" class="btn btn-secondary">Bi-weekly Report</a>
-            <a href="{{ url_for('report', mode='monthly') }}" class="btn btn-secondary">Monthly Report</a>
+            <a href="{{ url_for('report', mode='weekly') }}" class="btn btn-secondary" onclick="showLoading()">Weekly Report</a>
+            <a href="{{ url_for('report', mode='biweekly') }}" class="btn btn-secondary" onclick="showLoading()">Bi-weekly Report</a>
+            <a href="{{ url_for('report', mode='monthly') }}" class="btn btn-secondary" onclick="showLoading()">Monthly Report</a>
         </div>
         
         {% if report %}
@@ -203,6 +212,19 @@ function copyReport() {
     }).catch(err => {
         console.error('Failed to copy:', err);
     });
+}
+
+function showLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = 'flex';
+    
+    // Timeout after 120 seconds
+    setTimeout(() => {
+        if (overlay.style.display === 'flex') {
+            overlay.style.display = 'none';
+            alert('Report generation timed out or is taking longer than expected. The report may still load, or you may need to refresh.');
+        }
+    }, 120000);
 }
 </script>
 {% endblock %}

@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import datetime
 import os
+import shutil
 import webbrowser
 import click
 from threading import Timer
@@ -9,12 +10,13 @@ from .models import LogEntry
 from .report_generator import ReportGenerator
 
 
-def create_app():
+def create_app(verbose=False):
     """Create and configure Flask application."""
     app = Flask(__name__,
                 template_folder=os.path.join(os.path.dirname(__file__), 'ui', 'templates'),
                 static_folder=os.path.join(os.path.dirname(__file__), 'ui', 'static'))
     app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['VERBOSE'] = verbose
     
     db = Database()
     
@@ -91,10 +93,27 @@ def create_app():
         if mode not in ['weekly', 'biweekly', 'monthly']:
             return "Invalid report mode", 400
         
+        # Check settings for summarization
+        summarize = False
+        verbose = app.config.get('VERBOSE', False)
+        
+        if mode == 'monthly':
+            cline_avail = is_cline_available()
+            enabled = db.get_setting('ai_summary_enabled') == 'true'
+            summarize = cline_avail and enabled
+            
+            if verbose:
+                print(f"[VERBOSE] Monthly report requested. Summarization: {summarize}")
+                print(f"[VERBOSE] Cline available: {cline_avail}, Enabled setting: {enabled}")
+        
         start_date, end_date = ReportGenerator.get_date_range(mode)
         logs = db.get_logs(start_date, end_date)
-        report_html = ReportGenerator.format_report_html(logs, mode)
-        report_text = ReportGenerator.format_report(logs, mode)
+        
+        if verbose:
+            print(f"[VERBOSE] Found {len(logs)} logs for period {start_date} - {end_date}")
+        
+        report_html = ReportGenerator.format_report_html(logs, mode, summarize, verbose)
+        report_text = ReportGenerator.format_report(logs, mode, summarize, verbose)
         
         return render_template('index.html', 
                              logs=db.get_logs(), 
@@ -107,6 +126,23 @@ def create_app():
     def settings():
         """Settings page."""
         return render_template('settings.html')
+        
+    @app.route('/api/settings', methods=['GET'])
+    def get_settings():
+        """Get all settings and system capabilities."""
+        settings = {
+            'ai_summary_enabled': db.get_setting('ai_summary_enabled') == 'true',
+            'cline_available': is_cline_available()
+        }
+        return jsonify(settings)
+        
+    @app.route('/api/settings', methods=['POST'])
+    def update_settings():
+        """Update settings."""
+        data = request.json
+        if 'ai_summary_enabled' in data:
+            db.set_setting('ai_summary_enabled', 'true' if data['ai_summary_enabled'] else 'false')
+        return jsonify({'success': True})
     
     @app.route('/clear_all', methods=['POST'])
     def clear_all():
@@ -121,6 +157,11 @@ def create_app():
         return jsonify([log.to_dict() for log in logs])
     
     return app
+
+
+def is_cline_available():
+    """Check if cline CLI is available."""
+    return shutil.which('cline') is not None
 
 
 def open_browser(port=5000):
@@ -164,12 +205,15 @@ def open_browser(port=5000):
 
 @click.command()
 @click.option('--port', '-p', default=5000, help='Port to run the server on')
-def main(port):
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output for debugging')
+def main(port, verbose):
     """Main entry point for fastrep-ui command."""
-    app = create_app()
+    app = create_app(verbose)
     
     print("=" * 60)
     print("FastRep Web UI Starting...")
+    if verbose:
+        print("[VERBOSE] Verbose mode enabled")
     print("=" * 60)
     print(f"\n🚀 Access the web interface at: http://127.0.0.1:{port}")
     print("\n📝 Features:")
