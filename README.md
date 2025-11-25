@@ -18,6 +18,8 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 - **Dark/Light Theme**: Choose your preferred theme or sync with system settings
 - **App Mode**: Launches as a standalone application window for a cleaner experience
 - **AI Summarization**: Automatically summarizes extensive monthly logs into concise bullet points using Cline
+- **Customizable Templates**: Choose from multiple report formats (Classic, Modern, Professional, etc.) to suit your needs
+- **Smart Reminders**: Configure daily desktop notifications to remind you to log your work
 
 ## Screenshots
 
@@ -190,10 +192,13 @@ The web interface provides:
 3. **Report Generation**: One-click weekly, bi-weekly, and monthly reports
 4. **Copy to Clipboard**: Easy report copying for emails/documents
 5. **AI Summarization**: Intelligent summarization for monthly reports (requires Cline CLI)
-6. **Theme Support**: Toggle between Light, Dark, and System themes
-7. **Settings**: Database management, AI configuration, and preferences
-8. **App Mode**: Opens in a dedicated window without browser clutter
-9. **Compact Design**: Optimized form layout for quick entry
+6. **Custom Instructions**: Provide specific guidance to the AI for tailored report summaries
+7. **Report Templates**: Select from various visual styles (Classic, Bold, Modern, Professional, Compact) with live preview
+8. **Theme Support**: Toggle between Light, Dark, and System themes
+9. **Daily Reminders**: Set up custom notifications to log your work
+10. **Settings**: Comprehensive configuration for all features
+11. **App Mode**: Opens in a dedicated window without browser clutter
+12. **Compact Design**: Optimized form layout for quick entry
 
 ## Database Location
 

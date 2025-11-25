@@ -65,17 +65,19 @@
                 <div class="form-group">
                     <label>Select Template:</label>
                     <select id="report-template" onchange="updateTemplatePreview()" style="width: 200px; padding: 0.5rem;">
-                        <option value="classic">Classic (Plain)</option>
+                        <option value="classic">Classic</option>
+                        <option value="classic_clean">Classic (No Header)</option>
                         <option value="bold">Bold Dates</option>
-                        <option value="modern">Modern (Italic)</option>
-                        <option value="professional">Professional (Badges)</option>
-                        <option value="compact">Compact (Minimal)</option>
+                        <option value="modern">Modern</option>
+                        <option value="professional">Professional</option>
+                        <option value="professional_clean">Professional (No Header)</option>
+                        <option value="compact">Compact</option>
                     </select>
                 </div>
                 
                 <div class="template-preview-box">
                     <h4>Preview</h4>
-                    <div id="template-preview-content" class="report-content" style="margin: 0; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px; background: var(--background);">
+                    <div id="template-preview-content" class="report-content" style="margin: 0; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px; background: var(--background); white-space: normal;">
                         <!-- Preview content injected by JS -->
                     </div>
                 </div>
@@ -163,7 +165,7 @@ fastrep delete --id 1</code></pre>
         <div class="settings-section">
             <h3>About</h3>
             <p class="info-text">
-                FastRep v2.0.5<br>
+                FastRep v2.0.6<br>
                 A simple work log manager for tracking daily activities and generating reports.<br>
                 <a href="https://github.com/hissain/fastrep" target="_blank">GitHub Repository</a>
             </p>
@@ -315,24 +317,53 @@ async function updateAiSettings() {
 function updateTemplatePreview() {
     const template = document.getElementById('report-template').value;
     const previewDiv = document.getElementById('template-preview-content');
-    const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
-    const fullDate = new Date().toISOString().split('T')[0];
-    const longDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
     
-    let html = '';
+    // Mock Data
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
     
-    // Mock preview based on template logic in Python
-    if (template === 'classic') {
-        html = `<ul><li><strong>${date}</strong> - Completed feature implementation</li></ul>`;
-    } else if (template === 'bold') {
-        html = `<ul><li><b style="color:var(--primary-color)">${fullDate}</b>: Completed feature implementation</li></ul>`;
-    } else if (template === 'modern') {
-        html = `<ul><li>Completed feature implementation <em style="color:var(--text-secondary)">(${date})</em></li></ul>`;
-    } else if (template === 'professional') {
-        html = `<ul><li><span class="badge" style="background:#64748b">${longDate}</span> Completed feature implementation</li></ul>`;
+    const formatDate = (d, type) => {
+        if (type === 'full') return d.toISOString().split('T')[0];
+        if (type === 'long') return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        if (type === 'short') return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+        return d.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+    };
+    
+    const header = template.includes('clean') || template === 'compact' ? '' : `<p><strong>Report Period:</strong> ${formatDate(yesterday, 'short')} - ${formatDate(today, 'short')}</p>`;
+    
+    let itemFormat = (d, desc) => `<li><strong>${d}</strong> - ${desc}</li>`;
+    let dateFormat = 'short';
+    
+    if (template.startsWith('bold')) {
+        dateFormat = 'full';
+        itemFormat = (d, desc) => `<li><b style="color:var(--primary-color)">${d}</b>: ${desc}</li>`;
+    } else if (template.startsWith('modern')) {
+        dateFormat = 'long';
+        itemFormat = (d, desc) => `<li>${desc} <em style="color:var(--text-secondary)">(${d})</em></li>`;
+    } else if (template.startsWith('professional')) {
+        dateFormat = 'long';
+        itemFormat = (d, desc) => `<li><span class="badge" style="background:#64748b">${d}</span> ${desc}</li>`;
     } else if (template === 'compact') {
-        html = `<ul><li><small style="color:var(--text-secondary)">${date}</small> Completed feature implementation</li></ul>`;
+        dateFormat = 'short';
+        itemFormat = (d, desc) => `<li><small style="color:var(--text-secondary)">${d}</small> ${desc}</li>`;
     }
+    
+    const renderProject = (name, tasks) => `
+        <h4>${name}</h4>
+        <ul>
+            ${tasks.map(t => itemFormat(formatDate(t.date, dateFormat), t.desc)).join('')}
+        </ul>
+    `;
+    
+    let html = header;
+    html += renderProject('Project Alpha', [
+        {date: today, desc: 'Implemented new authentication flow'},
+        {date: yesterday, desc: 'Fixed login bug reported by QA'}
+    ]);
+    html += renderProject('Maintenance', [
+        {date: today, desc: 'Server updates and security patches'}
+    ]);
     
     previewDiv.innerHTML = html;
     

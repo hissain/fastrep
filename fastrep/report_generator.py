@@ -16,15 +16,25 @@ class ReportGenerator:
     TEMPLATES = {
         'classic': {
             'name': 'Classic',
-            'description': 'Dates at start, plain text.',
+            'description': 'Standard format with date range header.',
             'date_format': '%m/%d',
+            'show_header': True,
+            'html_item': '<li><strong>{date}</strong> - {description}</li>',
+            'text_item': '  * {date} - {description}'
+        },
+        'classic_clean': {
+            'name': 'Classic (No Header)',
+            'description': 'Standard format without date range header.',
+            'date_format': '%m/%d',
+            'show_header': False,
             'html_item': '<li><strong>{date}</strong> - {description}</li>',
             'text_item': '  * {date} - {description}'
         },
         'bold': {
             'name': 'Bold Dates',
-            'description': 'Dates at start, bolded.',
+            'description': 'Dates bolded at start.',
             'date_format': '%Y-%m-%d',
+            'show_header': True,
             'html_item': '<li><b style="color:var(--primary-color)">{date}</b>: {description}</li>',
             'text_item': '  * **{date}**: {description}'
         },
@@ -32,20 +42,31 @@ class ReportGenerator:
             'name': 'Modern',
             'description': 'Description first, italic date at end.',
             'date_format': '%b %d',
+            'show_header': True,
             'html_item': '<li>{description} <em style="color:var(--text-secondary)">({date})</em></li>',
             'text_item': '  * {description} ({date})'
         },
         'professional': {
             'name': 'Professional',
-            'description': 'Detailed date format.',
+            'description': 'Detailed date badges.',
             'date_format': '%A, %B %d',
+            'show_header': True,
+            'html_item': '<li><span class="badge" style="background:#64748b">{date}</span> {description}</li>',
+            'text_item': '  * [{date}] {description}'
+        },
+        'professional_clean': {
+            'name': 'Professional (No Header)',
+            'description': 'Detailed badges without range header.',
+            'date_format': '%A, %B %d',
+            'show_header': False,
             'html_item': '<li><span class="badge" style="background:#64748b">{date}</span> {description}</li>',
             'text_item': '  * [{date}] {description}'
         },
         'compact': {
             'name': 'Compact',
-            'description': 'Minimalist.',
+            'description': 'Minimalist layout.',
             'date_format': '%m/%d',
+            'show_header': False,
             'html_item': '<li><small style="color:var(--text-secondary)">{date}</small> {description}</li>',
             'text_item': '  - {date} {description}'
         }
