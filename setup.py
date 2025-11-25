@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="fastrep",
-    version="2.0.4",
+    version="2.0.5",
     author="Md. Sazzad Hissain Khan",
     author_email="hissain.khan@gmail.com",
     description="A CLI and web-based tool for tracking daily work activities and generating reports",

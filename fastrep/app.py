@@ -150,12 +150,17 @@ def create_app(verbosity=0):
         summarize = False
         summary_points = "3-5"
         timeout = 120
+        custom_instructions = ""
         verbosity = app.config.get('VERBOSITY', 0)
+        
+        # Template settings
+        template_name = db.get_setting('report_template', 'classic')
         
         if mode == 'monthly':
             cline_avail = is_cline_available()
             enabled = db.get_setting('ai_summary_enabled') == 'true'
             summary_points = db.get_setting('ai_summary_points', '3-5')
+            custom_instructions = db.get_setting('ai_custom_instructions', '')
             try:
                 timeout = int(db.get_setting('ai_timeout', '120'))
             except ValueError:
@@ -174,8 +179,8 @@ def create_app(verbosity=0):
         # Generate summaries once
         summaries = ReportGenerator.generate_summaries(logs, mode, summarize, verbosity, summary_points, timeout)
         
-        report_html = ReportGenerator.format_report_html(logs, mode, summaries)
-        report_text = ReportGenerator.format_report(logs, mode, summaries, verbosity)
+        report_html = ReportGenerator.format_report_html(logs, mode, summaries, template_name)
+        report_text = ReportGenerator.format_report(logs, mode, summaries, verbosity, custom_instructions, template_name)
         
         return render_template('index.html', 
                              logs=db.get_logs(), 
@@ -197,8 +202,10 @@ def create_app(verbosity=0):
             'ai_summary_enabled': db.get_setting('ai_summary_enabled') == 'true',
             'ai_summary_points': db.get_setting('ai_summary_points', '3-5'),
             'ai_timeout': int(db.get_setting('ai_timeout', '120')),
+            'ai_custom_instructions': db.get_setting('ai_custom_instructions', ''),
             'cline_available': is_cline_available(),
             # Preferences
+            'report_template': db.get_setting('report_template', 'classic'),
             'recent_logs_limit': int(db.get_setting('recent_logs_limit', '20')),
             'auto_open_browser': db.get_setting('auto_open_browser', 'true') == 'true',
             # Reminders
@@ -218,6 +225,11 @@ def create_app(verbosity=0):
             db.set_setting('ai_summary_points', str(data['ai_summary_points']))
         if 'ai_timeout' in data:
             db.set_setting('ai_timeout', str(data['ai_timeout']))
+        if 'ai_custom_instructions' in data:
+            db.set_setting('ai_custom_instructions', str(data['ai_custom_instructions']))
+            
+        if 'report_template' in data:
+            db.set_setting('report_template', str(data['report_template']))
         if 'recent_logs_limit' in data:
             db.set_setting('recent_logs_limit', str(data['recent_logs_limit']))
         if 'auto_open_browser' in data:

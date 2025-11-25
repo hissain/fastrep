@@ -12,6 +12,44 @@ logger = logging.getLogger(__name__)
 
 class ReportGenerator:
     """Generate formatted reports from log entries."""
+
+    TEMPLATES = {
+        'classic': {
+            'name': 'Classic',
+            'description': 'Dates at start, plain text.',
+            'date_format': '%m/%d',
+            'html_item': '<li><strong>{date}</strong> - {description}</li>',
+            'text_item': '  * {date} - {description}'
+        },
+        'bold': {
+            'name': 'Bold Dates',
+            'description': 'Dates at start, bolded.',
+            'date_format': '%Y-%m-%d',
+            'html_item': '<li><b style="color:var(--primary-color)">{date}</b>: {description}</li>',
+            'text_item': '  * **{date}**: {description}'
+        },
+        'modern': {
+            'name': 'Modern',
+            'description': 'Description first, italic date at end.',
+            'date_format': '%b %d',
+            'html_item': '<li>{description} <em style="color:var(--text-secondary)">({date})</em></li>',
+            'text_item': '  * {description} ({date})'
+        },
+        'professional': {
+            'name': 'Professional',
+            'description': 'Detailed date format.',
+            'date_format': '%A, %B %d',
+            'html_item': '<li><span class="badge" style="background:#64748b">{date}</span> {description}</li>',
+            'text_item': '  * [{date}] {description}'
+        },
+        'compact': {
+            'name': 'Compact',
+            'description': 'Minimalist.',
+            'date_format': '%m/%d',
+            'html_item': '<li><small style="color:var(--text-secondary)">{date}</small> {description}</li>',
+            'text_item': '  - {date} {description}'
+        }
+    }
     
     @staticmethod
     def get_date_range(mode: str) -> tuple:
@@ -137,17 +175,24 @@ class ReportGenerator:
         return summaries
 
     @staticmethod
-    def improve_report_text(report_text: str, verbosity: int = 0) -> str:
+    def improve_report_text(report_text: str, verbosity: int = 0, custom_instructions: str = "") -> str:
         """Improve the grammar and tone of the full report text."""
         # Create a temporary file for output
         temp_dir = os.path.join(os.path.expanduser("~"), ".fastrep", "temp")
         os.makedirs(temp_dir, exist_ok=True)
         output_file = os.path.join(temp_dir, f"improved_report_{int(time.time())}.txt")
             
+        instruction = (
+            "Review and improve the following work report. "
+            "Ensure correct grammar, professional tone, and consistency. "
+            "Do NOT remove any information, dates, or projects. "
+        )
+        
+        if custom_instructions:
+            instruction += f"\n\nAdditional Custom Instructions: {custom_instructions}"
+            
         prompt = (
-            f"Review and improve the following work report. "
-            f"Ensure correct grammar, professional tone, and consistency. "
-            f"Do NOT remove any information, dates, or projects. "
+            f"{instruction}\n"
             f"Write the improved report to the file '{output_file}'. "
             f"Do not include any other text or conversation.\n\n"
             f"Report:\n{report_text}"
@@ -183,13 +228,14 @@ class ReportGenerator:
         return report_text
 
     @staticmethod
-    def format_report(logs: List[LogEntry], mode: str = None, summaries: dict = None, verbosity: int = 0) -> str:
+    def format_report(logs: List[LogEntry], mode: str = None, summaries: dict = None, verbosity: int = 0, custom_instructions: str = "", template_name: str = 'classic') -> str:
         """Format logs into a readable report."""
         if not logs:
             return "No logs found for this period."
         
         grouped = ReportGenerator.group_by_project(logs)
         summaries = summaries or {}
+        template = ReportGenerator.TEMPLATES.get(template_name, ReportGenerator.TEMPLATES['classic'])
         
         report_lines = []
         
@@ -210,47 +256,31 @@ class ReportGenerator:
                 for line in summaries[project]:
                     report_lines.append(f"  {line}")
             else:
-                # If summarized but no summary (fallback) or normal
-                # Check if we should fallback (e.g. > 5 logs but no summary)
-                # But generate_summaries handles the decision. 
-                # If key missing, print normally or fallback.
-                # If user wanted summary but failed, generate_summaries returns empty for that project?
-                # Let's assume if >10 logs and no summary, fallback logic applies here too?
-                # No, let's keep it simple: if in summaries dict, use it. Else raw.
-                # If generate_summaries failed, it didn't add to dict.
-                # We should probably implement the fallback here: if > 5 logs and mode==monthly and no summary, slice.
-                # But `summaries` is the source of truth for "AI content".
-                # I'll stick to raw logs if no summary.
-                # Wait, user wanted fallback to 10 logs if AI fails.
-                # I'll just show all logs or slice to 10 if it looks like it was supposed to be summarized?
-                # Actually, `format_report` doesn't know if it *failed*.
-                # Let's just show logs.
-                
-                # Wait, if I want consistent behavior with previous step:
-                # I should probably slice if > 10 logs regardless?
-                # No, user only said fallback if AI times out.
-                
                 for log in project_logs:
-                    date_str = log.date.strftime('%m/%d')
-                    report_lines.append(f"  * {date_str} - {log.description}")
+                    date_str = log.date.strftime(template['date_format'])
+                    # report_lines.append(f"  * {date_str} - {log.description}")
+                    # Use template format
+                    formatted_line = template['text_item'].format(date=date_str, description=log.description)
+                    report_lines.append(formatted_line)
             
             report_lines.append("")
         
         final_text = "\n".join(report_lines)
         
         if summaries:
-            return ReportGenerator.improve_report_text(final_text, verbosity)
+            return ReportGenerator.improve_report_text(final_text, verbosity, custom_instructions)
             
         return final_text
     
     @staticmethod
-    def format_report_html(logs: List[LogEntry], mode: str = None, summaries: dict = None) -> str:
+    def format_report_html(logs: List[LogEntry], mode: str = None, summaries: dict = None, template_name: str = 'classic') -> str:
         """Format logs into HTML report."""
         if not logs:
             return "<p>No logs found for this period.</p>"
         
         grouped = ReportGenerator.group_by_project(logs)
         summaries = summaries or {}
+        template = ReportGenerator.TEMPLATES.get(template_name, ReportGenerator.TEMPLATES['classic'])
         
         html_parts = []
         
@@ -273,8 +303,11 @@ class ReportGenerator:
             else:
                 html_parts.append("<ul>")
                 for log in project_logs:
-                    date_str = log.date.strftime('%m/%d')
-                    html_parts.append(f"<li><strong>{date_str}</strong> - {log.description}</li>")
+                    date_str = log.date.strftime(template['date_format'])
+                    # html_parts.append(f"<li><strong>{date_str}</strong> - {log.description}</li>")
+                    # Use template format
+                    formatted_line = template['html_item'].format(date=date_str, description=log.description)
+                    html_parts.append(formatted_line)
                 html_parts.append("</ul>")
         
         return "".join(html_parts)

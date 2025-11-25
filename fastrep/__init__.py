@@ -1,7 +1,7 @@
 # fastrep/__init__.py
 """FastRep - A CLI and web-based tool for tracking daily work activities and generating reports."""
 
-__version__ = "2.0.4"
+__version__ = "2.0.5"
 __author__ = "Md. Sazzad Hissain Khan"
 __email__ = "hissain.khan@gmail.com"
 

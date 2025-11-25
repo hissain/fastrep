@@ -49,6 +49,37 @@
                 <input type="number" id="ai-timeout" placeholder="120" onchange="updateAiSettings()" style="width: 200px;">
                 <p class="info-text" style="margin-top: 0.25rem;">Maximum time to wait for AI response per project.</p>
             </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="ai-instructions">Custom AI Instructions</label>
+                <textarea id="ai-instructions" rows="3" onchange="updateAiSettings()" placeholder="E.g. 'Focus on technical details', 'Use bullet points only', etc."></textarea>
+                <p class="info-text" style="margin-top: 0.25rem;">Additional instructions for the final report improvement step.</p>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3>Report Template</h3>
+            <p class="info-text">Choose a formatting style for your reports.</p>
+            
+            <div class="template-selector">
+                <div class="form-group">
+                    <label>Select Template:</label>
+                    <select id="report-template" onchange="updateTemplatePreview()" style="width: 200px; padding: 0.5rem;">
+                        <option value="classic">Classic (Plain)</option>
+                        <option value="bold">Bold Dates</option>
+                        <option value="modern">Modern (Italic)</option>
+                        <option value="professional">Professional (Badges)</option>
+                        <option value="compact">Compact (Minimal)</option>
+                    </select>
+                </div>
+                
+                <div class="template-preview-box">
+                    <h4>Preview</h4>
+                    <div id="template-preview-content" class="report-content" style="margin: 0; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px; background: var(--background);">
+                        <!-- Preview content injected by JS -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="settings-section">
@@ -132,7 +163,7 @@ fastrep delete --id 1</code></pre>
         <div class="settings-section">
             <h3>About</h3>
             <p class="info-text">
-                FastRep v2.0.4<br>
+                FastRep v2.0.5<br>
                 A simple work log manager for tracking daily activities and generating reports.<br>
                 <a href="https://github.com/hissain/fastrep" target="_blank">GitHub Repository</a>
             </p>
@@ -201,6 +232,15 @@ async function loadAiSettings() {
         if (settings.ai_timeout) {
             document.getElementById('ai-timeout').value = settings.ai_timeout;
         }
+        if (settings.ai_custom_instructions) {
+            document.getElementById('ai-instructions').value = settings.ai_custom_instructions;
+        }
+        
+        // Templates
+        if (settings.report_template) {
+            document.getElementById('report-template').value = settings.report_template;
+        }
+        updateTemplatePreview();
         
         // Preferences
         if (settings.recent_logs_limit) {
@@ -255,18 +295,53 @@ async function toggleAiSummary() {
 async function updateAiSettings() {
     const points = document.getElementById('ai-points').value;
     const timeout = document.getElementById('ai-timeout').value;
+    const instructions = document.getElementById('ai-instructions').value;
+    
     try {
         await fetch('/api/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 ai_summary_points: points,
-                ai_timeout: timeout 
+                ai_timeout: timeout,
+                ai_custom_instructions: instructions
             })
         });
     } catch (error) {
         console.error('Error updating settings:', error);
     }
+}
+
+function updateTemplatePreview() {
+    const template = document.getElementById('report-template').value;
+    const previewDiv = document.getElementById('template-preview-content');
+    const date = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' });
+    const fullDate = new Date().toISOString().split('T')[0];
+    const longDate = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    
+    let html = '';
+    
+    // Mock preview based on template logic in Python
+    if (template === 'classic') {
+        html = `<ul><li><strong>${date}</strong> - Completed feature implementation</li></ul>`;
+    } else if (template === 'bold') {
+        html = `<ul><li><b style="color:var(--primary-color)">${fullDate}</b>: Completed feature implementation</li></ul>`;
+    } else if (template === 'modern') {
+        html = `<ul><li>Completed feature implementation <em style="color:var(--text-secondary)">(${date})</em></li></ul>`;
+    } else if (template === 'professional') {
+        html = `<ul><li><span class="badge" style="background:#64748b">${longDate}</span> Completed feature implementation</li></ul>`;
+    } else if (template === 'compact') {
+        html = `<ul><li><small style="color:var(--text-secondary)">${date}</small> Completed feature implementation</li></ul>`;
+    }
+    
+    previewDiv.innerHTML = html;
+    
+    // Save setting
+    fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report_template: template })
+    }).catch(err => console.error(err));
 }
 
 async function updateReminderSettings() {
