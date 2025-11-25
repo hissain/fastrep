@@ -139,51 +139,5 @@ def projects():
     click.echo(f"\nTotal projects: {len(projects)}")
 
 
-@cli.command()
-def notify():
-    """Show a desktop notification to log work."""
-    db = Database()
-    # Only show notification if enabled and it's a configured day
-    reminder_enabled = db.get_setting('reminder_enabled', 'false') == 'true'
-    
-    if not reminder_enabled:
-        return
-        
-    today_weekday = str(datetime.now().weekday()) # Monday is 0 and Sunday is 6
-    reminder_days = db.get_setting('reminder_days', '0,1,2,3,4').split(',')
-    
-    if today_weekday not in reminder_days:
-        return
-
-    message = "Time to log your work!"
-    title = "FastRep Reminder"
-    
-    try:
-        if sys.platform == 'darwin': # macOS
-            fastrep_ui_path = subprocess.check_output(['which', 'fastrep-ui']).strip().decode()
-            
-            script = f'''
-            display dialog "{message}" with title "{title}" buttons {{"Open FastRep", "Later"}} default button "Open FastRep"
-            if button returned of result is "Open FastRep" then
-                tell application "Terminal"
-                    activate
-                    do script "{fastrep_ui_path}"
-                end tell
-            end if
-            '''
-            subprocess.run(['osascript', '-e', script], check=True)
-            
-        elif sys.platform.startswith('linux'): # Linux
-            # notify-send doesn't easily support callbacks to run commands.
-            # This will show a notification, but it won't be clickable to start the app.
-            subprocess.run(['notify-send', title, f"{message} Run 'fastrep-ui'."], check=True)
-        else:
-            click.echo("Notification not supported on this platform.")
-            
-    except (FileNotFoundError, subprocess.CalledProcessError) as e:
-        click.echo(f"Notification command failed: {e}")
-        click.echo(f"{title}: {message}")
-
-
 if __name__ == '__main__':
     cli()

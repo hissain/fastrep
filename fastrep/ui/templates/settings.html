@@ -146,38 +146,6 @@
             </div>
         </div>
         
-        <div class="settings-section">
-            <h3>Daily Reminders</h3>
-            <p class="info-text">
-                Schedule a system notification to remind you to log your work. This uses your system's scheduler (e.g., Cron on macOS/Linux, Task Scheduler on Windows).
-            </p>
-            
-            <div class="toggle-container">
-                <label class="switch">
-                    <input type="checkbox" id="reminder-toggle" onchange="updateReminderSettings()">
-                    <span class="slider round"></span>
-                </label>
-                <span>Enable Daily Reminders</span>
-            </div>
-            
-            <div class="form-group" style="margin-top: 1rem;">
-                <label for="reminder-time">Reminder Time</label>
-                <input type="time" id="reminder-time" onchange="updateReminderSettings()" style="width: 200px;">
-            </div>
-            
-            <div class="form-group">
-                <label>Reminder Days</label>
-                <div class="days-selector">
-                    <label><input type="checkbox" value="1" name="reminder_day" onchange="updateReminderSettings()"> Mon</label>
-                    <label><input type="checkbox" value="2" name="reminder_day" onchange="updateReminderSettings()"> Tue</label>
-                    <label><input type="checkbox" value="3" name="reminder_day" onchange="updateReminderSettings()"> Wed</label>
-                    <label><input type="checkbox" value="4" name="reminder_day" onchange="updateReminderSettings()"> Thu</label>
-                    <label><input type="checkbox" value="5" name="reminder_day" onchange="updateReminderSettings()"> Fri</label>
-                    <label><input type="checkbox" value="6" name="reminder_day" onchange="updateReminderSettings()"> Sat</label>
-                    <label><input type="checkbox" value="0" name="reminder_day" onchange="updateReminderSettings()"> Sun</label>
-                </div>
-            </div>
-        </div>
         
         <div class="settings-section">
             <h3>Database Management</h3>
@@ -209,7 +177,7 @@ fastrep delete --id 1</code></pre>
         <div class="settings-section">
             <h3>About</h3>
             <p class="info-text">
-                FastRep v2.0.7<br>
+                FastRep v2.0.8<br>
                 A simple work log manager for tracking daily activities and generating reports.<br>
                 <a href="https://github.com/hissain/fastrep" target="_blank">GitHub Repository</a>
             </p>
@@ -313,13 +281,6 @@ async function loadAiSettings() {
         }
         document.getElementById('auto-browser').checked = settings.auto_open_browser;
 
-        // Reminders
-        document.getElementById('reminder-toggle').checked = settings.reminder_enabled;
-        document.getElementById('reminder-time').value = settings.reminder_time;
-        document.querySelectorAll('input[name="reminder_day"]').forEach(day => {
-            day.checked = settings.reminder_days.includes(day.value);
-        });
-        
     } catch (error) {
         console.error('Error loading settings:', error);
     }
@@ -438,26 +399,6 @@ function updateTemplatePreview() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ report_template: template })
     }).catch(err => console.error(err));
-}
-
-async function updateReminderSettings() {
-    const enabled = document.getElementById('reminder-toggle').checked;
-    const time = document.getElementById('reminder-time').value;
-    const days = Array.from(document.querySelectorAll('input[name="reminder_day"]:checked')).map(el => el.value);
-    
-    try {
-        await fetch('/api/settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                reminder_enabled: enabled,
-                reminder_time: time,
-                reminder_days: days
-            })
-        });
-    } catch (error) {
-        console.error('Error updating reminder settings:', error);
-    }
 }
 
 // Load settings on page load

@@ -153,7 +153,6 @@ def create_app(verbosity=0):
         summarize = False
         summary_points = "3-5"
         timeout = 120
-        threshold = 5
         custom_instructions = ""
         verbosity = app.config.get('VERBOSITY', 0)
         
@@ -179,18 +178,11 @@ def create_app(verbosity=0):
                 summary_points = '3-5'
                 
             custom_instructions = db.get_setting('ai_custom_instructions', '')
-            
             try:
                 timeout_val = db.get_setting('ai_timeout', '120')
                 timeout = int(timeout_val) if timeout_val else 120
             except ValueError:
                 timeout = 120
-                
-            try:
-                threshold_val = db.get_setting('ai_summary_threshold', '5')
-                threshold = int(threshold_val) if threshold_val else 5
-            except ValueError:
-                threshold = 5
         
         # Collect provider settings
         provider_config = {
@@ -204,7 +196,7 @@ def create_app(verbosity=0):
         
         if summarize:
             logger.info(f"{mode.title()} report requested. Summarization: {summarize}")
-            logger.debug(f"Provider: {provider_config['provider']}, Points: {summary_points}, Timeout: {timeout}, Threshold: {threshold}")
+            logger.debug(f"Provider: {provider_config['provider']}, Points: {summary_points}, Timeout: {timeout}")
         
         start_date, end_date = ReportGenerator.get_date_range(mode)
         logs = db.get_logs(start_date, end_date)
@@ -213,7 +205,7 @@ def create_app(verbosity=0):
         
         # Generate summaries
         summaries = ReportGenerator.generate_summaries(
-            logs, mode, summarize, verbosity, summary_points, timeout, provider_config, threshold
+            logs, mode, summarize, verbosity, summary_points, timeout, provider_config
         )
         
         report_html = ReportGenerator.format_report_html(logs, mode, summaries, template_name)
@@ -252,7 +244,6 @@ def create_app(verbosity=0):
             'ai_summary_enabled': db.get_setting('ai_summary_enabled') == 'true', # Legacy/Master
             'ai_summary_points': db.get_setting('ai_summary_points', '3-5'),
             'ai_timeout': safe_int(db.get_setting('ai_timeout'), 120),
-            'ai_summary_threshold': safe_int(db.get_setting('ai_summary_threshold'), 5),
             'ai_custom_instructions': db.get_setting('ai_custom_instructions', ''),
             
             # Provider Settings
@@ -266,10 +257,6 @@ def create_app(verbosity=0):
             'report_template': db.get_setting('report_template', 'classic'),
             'recent_logs_limit': safe_int(db.get_setting('recent_logs_limit'), 20),
             'auto_open_browser': db.get_setting('auto_open_browser', 'true') == 'true',
-            # Reminders
-            'reminder_enabled': db.get_setting('reminder_enabled', 'false') == 'true',
-            'reminder_time': db.get_setting('reminder_time', '17:30'),
-            'reminder_days': db.get_setting('reminder_days', '0,1,2,3,4').split(','),
         }
         return jsonify(settings)
         
@@ -294,8 +281,6 @@ def create_app(verbosity=0):
             db.set_setting('ai_summary_points', str(data['ai_summary_points']))
         if 'ai_timeout' in data:
             db.set_setting('ai_timeout', str(data['ai_timeout']))
-        if 'ai_summary_threshold' in data:
-            db.set_setting('ai_summary_threshold', str(data['ai_summary_threshold']))
         if 'ai_custom_instructions' in data:
             db.set_setting('ai_custom_instructions', str(data['ai_custom_instructions']))
             
@@ -315,17 +300,6 @@ def create_app(verbosity=0):
             db.set_setting('recent_logs_limit', str(data['recent_logs_limit']))
         if 'auto_open_browser' in data:
             db.set_setting('auto_open_browser', 'true' if data['auto_open_browser'] else 'false')
-        
-        # Reminder settings
-        if 'reminder_enabled' in data:
-            db.set_setting('reminder_enabled', 'true' if data['reminder_enabled'] else 'false')
-        if 'reminder_time' in data:
-            db.set_setting('reminder_time', data['reminder_time'])
-        if 'reminder_days' in data:
-            db.set_setting('reminder_days', ','.join(data['reminder_days']))
-
-        # After saving settings, schedule the cron job
-        schedule_reminder_job()
 
         return jsonify({'success': True})
     
@@ -342,69 +316,6 @@ def create_app(verbosity=0):
         return jsonify([log.to_dict() for log in logs])
     
     return app
-
-
-def schedule_reminder_job():
-    """Update the system's scheduled task for reminders."""
-    import subprocess
-    db = Database()
-    
-    enabled = db.get_setting('reminder_enabled') == 'true'
-    time_str = db.get_setting('reminder_time', '17:30')
-    days = db.get_setting('reminder_days', '0,1,2,3,4')
-    
-    try:
-        fastrep_path = shutil.which('fastrep')
-        if not fastrep_path:
-            logger.error("Could not find 'fastrep' executable in PATH.")
-            return
-
-        if sys.platform == 'win32':
-            # Windows Task Scheduler
-            task_name = "FastRepReminder"
-            if enabled:
-                hour, minute = time_str.split(':')
-                day_map = {0: 'MON', 1: 'TUE', 2: 'WED', 3: 'THU', 4: 'FRI', 5: 'SAT', 6: 'SUN'}
-                days_str = ",".join([day_map[int(d)] for d in days.split(',')])
-                
-                cmd = [
-                    'schtasks', '/Create', '/TN', task_name,
-                    '/TR', f'"{fastrep_path}" notify',
-                    '/SC', 'DAILY', '/ST', time_str, '/F'
-                ]
-                subprocess.run(cmd, check=True, capture_output=True)
-                logger.info("Windows scheduled task updated.")
-            else:
-                # Delete task
-                cmd = ['schtasks', '/Delete', '/TN', task_name, '/F']
-                # Ignore errors if task doesn't exist
-                subprocess.run(cmd, check=False, capture_output=True)
-                logger.info("Windows scheduled task removed.")
-
-        else:
-            # Unix-like (macOS, Linux) with cron
-            result = subprocess.run(['crontab', '-l'], capture_output=True, text=True)
-            current_crontab = result.stdout
-            
-            new_crontab_lines = [
-                line for line in current_crontab.splitlines() 
-                if "fastrep notify" not in line and line.strip()
-            ]
-            
-            if enabled:
-                hour, minute = time_str.split(':')
-                # Cron days are 0-6 (Sun-Sat) or 1-7 (Mon-Sun) depending on system.
-                # Python is Mon=0, Sun=6. Cron is Sun=0 or 7.
-                # To be safe, we let `fastrep notify` check the day.
-                cron_job = f"{minute} {hour} * * * {fastrep_path} notify"
-                new_crontab_lines.append(cron_job)
-                
-            new_crontab = "\n".join(new_crontab_lines) + "\n"
-            subprocess.run(['crontab', '-'], input=new_crontab, text=True, check=True)
-            logger.info(f"Cron job {'updated' if enabled else 'removed'}.")
-            
-    except (FileNotFoundError, subprocess.CalledProcessError) as e:
-        logger.error(f"Failed to update scheduled task: {e}")
 
 
 def is_cline_available():

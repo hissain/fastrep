@@ -11,7 +11,6 @@ A powerful CLI and web-based tool for tracking daily work activities and generat
 - **Automatic Reports**: Generate weekly, bi-weekly, and monthly reports instantly.
 - **Dual Interface**: Use either the command-line interface or the professional web UI.
 - **AI Summarization**: Intelligent summarization for monthly reports using **Cline**, **OpenAI**, **Anthropic**, or **Gemini**.
-- **Smart Reminders**: Configure cross-platform daily desktop notifications to log your work.
 - **Customizable Templates**: Choose from 7+ visual styles (Classic, Bold, Modern, Professional, etc.) with live preview.
 - **App Mode**: Launches as a standalone application window for a cleaner experience.
 - **Data Management**: All data stored locally in a lightweight SQLite database.
@@ -64,9 +63,6 @@ fastrep log -p "Project Alpha" -d "Implemented user authentication"
 
 # View weekly report
 fastrep view --mode weekly
-
-# Set up a daily reminder
-fastrep notify
 ```
 
 For a full list of commands, run `fastrep --help`.
