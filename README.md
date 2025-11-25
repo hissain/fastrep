@@ -33,9 +33,7 @@ pip install fastrep
 Or install from source for development:
 
 ```bash
-git clone https://github.com/hissain/fastrep.git
-cd fastrep
-pip install -e .
+pip install git+https://github.com/hissain/fastrep.git
 ```
 
 ## Quick Start
